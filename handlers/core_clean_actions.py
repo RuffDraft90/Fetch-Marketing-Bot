@@ -26,7 +26,7 @@ from concurrent.futures import ThreadPoolExecutor
 # Core modal imports
 from modals.core_modal_system import (
     create_event_modal, create_ai_suggestions_modal, create_content_modal,
-    create_suggestions_results_modal, create_slides_modal, create_suggestion_confirmation_modal,
+    create_slides_modal, create_suggestion_confirmation_modal,
     create_campaign_modal, create_content_generator_modal, 
     create_campaign_optimizer_modal, create_audience_analysis_modal,
     handle_dashboard_action, handle_ai_tool_selection, handle_modal_navigation
@@ -455,7 +455,7 @@ def register_clean_handlers(app):
         await ack()
         user_id = body["user"]["id"]
         suggestions = await generate_ai_suggestions("event", 5, user_id)
-        modal = create_suggestions_results_modal(suggestions, "event")
+        modal = create_ai_suggestions_modal(suggestions)
         await update_modal_view(client, body["view"]["id"], modal, user_id, "event_suggestions")
 
     @app.action("suggest_slides")
@@ -463,7 +463,7 @@ def register_clean_handlers(app):
         await ack()
         user_id = body["user"]["id"]
         suggestions = await generate_ai_suggestions("slides", 5, user_id)
-        modal = create_suggestions_results_modal(suggestions, "slides")
+        modal = create_ai_suggestions_modal(suggestions)
         await update_modal_view(client, body["view"]["id"], modal, user_id, "slides_suggestions")
 
     @app.action("suggest_campaigns")
@@ -471,7 +471,7 @@ def register_clean_handlers(app):
         await ack()
         user_id = body["user"]["id"]
         suggestions = await generate_ai_suggestions("campaign", 5, user_id)
-        modal = create_suggestions_results_modal(suggestions, "campaign")
+        modal = create_ai_suggestions_modal(suggestions)
         await update_modal_view(client, body["view"]["id"], modal, user_id, "campaign_suggestions")
 
     @app.action("generate_more")
@@ -488,7 +488,7 @@ def register_clean_handlers(app):
             suggestion_type = "campaign"
         
         suggestions = await generate_ai_suggestions(suggestion_type, 5, user_id)
-        modal = create_suggestions_results_modal(suggestions, suggestion_type)
+        modal = create_ai_suggestions_modal(suggestions)
         await update_modal_view(client, body["view"]["id"], modal, user_id, f"{suggestion_type}_suggestions")
 
     # ===== SUGGESTION USAGE HANDLERS =====
@@ -646,7 +646,7 @@ def register_clean_handlers(app):
             elif selected_value == "generate_new":
                 # Generate fresh suggestions
                 suggestions = await generate_ai_suggestions("campaign", 5, user_id)
-                modal = create_suggestions_results_modal(suggestions, "campaign")
+                modal = create_ai_suggestions_modal(suggestions)
                 await update_modal_view(client, body["view"]["id"], modal, user_id, "new_suggestions")
             elif selected_value == "export_monday":
                 message = "📤 *Exporting to Monday.com...*\n\nYour campaign suggestions are being exported."

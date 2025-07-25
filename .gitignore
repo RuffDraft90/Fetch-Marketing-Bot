@@ -1,0 +1,80 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environments
+venv/
+env/
+ENV/
+.venv/
+.env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# API Keys and Secrets
+.env
+*.pem
+credentials.json
+google_credentials.json
+
+# Cache
+.cache/
+.pytest_cache/
+
+# Temporary files
+*.tmp
+*.bak
+
+# Development and test files
+test_*.py
+demo_*.py
+validate_*.py
+*_test.py
+
+# Documentation (keep only README.md)
+*_SUMMARY.md
+*_RESULTS.md  
+*_GUIDE.md
+VERIFICATION_*.md
+FINAL_*.md
+
+# Temporary data files
+*.csv
+ja.py
+jj.sh

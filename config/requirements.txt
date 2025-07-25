@@ -1,0 +1,26 @@
+# Core Marketing Bot - Essential Dependencies
+# ==========================================
+
+# Core Slack Bot Framework
+slack-bolt>=1.14.0
+slack-sdk>=3.19.0
+python-dotenv>=1.0.0
+
+# Google Services Integration
+google-api-python-client>=2.70.0
+google-auth>=2.15.0
+google-auth-oauthlib>=0.8.0
+google-auth-httplib2>=0.1.0
+
+# Monday.com Integration
+monday>=1.3.0
+requests>=2.31.0
+
+# OpenAI Integration
+openai>=1.0.0
+
+# Async HTTP for performance
+aiohttp>=3.8.0
+
+# Basic logging
+coloredlogs>=15.0

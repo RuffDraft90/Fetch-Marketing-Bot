@@ -161,17 +161,8 @@ async def handle_form_submission(form_data: Dict[str, Any]) -> Dict[str, Any]:
 # MODAL CREATION FUNCTIONS
 # ========================================
 
-def add_dividers_to_modal(modal: Dict[str, Any]) -> Dict[str, Any]:
-    """Add dividers between sections in a modal."""
-    updated_blocks = []
-    for block in modal.get("blocks", []):
-        updated_blocks.append(block)
-        if block.get("type") == "section":
-            updated_blocks.append({"type": "divider"})
-    modal["blocks"] = updated_blocks
-    return modal
 
-def fetch_google_calendar_events():
+async def fetch_google_calendar_events():
     """Fetch upcoming events from Google Calendar API."""
     # Enhanced placeholder for actual Google Calendar API integration
     # Replace with logic to fetch events using google_calendar_service.py
@@ -225,7 +216,7 @@ def fetch_google_calendar_events():
         }
     ]
 
-def fetch_monday_campaigns():
+async def fetch_monday_campaigns():
     """Fetch active campaigns from Monday.com."""
     # Enhanced placeholder for actual Monday.com API integration
     # Replace with logic to fetch campaigns using monday_service.py
@@ -270,7 +261,7 @@ def fetch_monday_campaigns():
             "progress": 80,
             "next_task": "Final Approval",
             "assignee": "Karen or Kate",
-            "due_date": "2025-07-25",
+            "due_date": "2025-07-28",
             "board_url": "https://fetchrewards.monday.com/boards/12347",
             "total_tasks": 15,
             "completed_tasks": 12,
@@ -291,9 +282,9 @@ def fetch_monday_campaigns():
         }
     ]
 
-def create_google_calendar_view():
+async def create_google_calendar_view():
     """Create a Google Calendar view for the dashboard modal."""
-    events = fetch_google_calendar_events()
+    events = await fetch_google_calendar_events()
     event_blocks = []
 
     for event in events:
@@ -343,9 +334,9 @@ def create_google_calendar_view():
 
     return event_blocks
 
-def create_monday_campaigns_view():
+async def create_monday_campaigns_view():
     """Create a Monday.com campaigns view for the dashboard modal."""
-    campaigns = fetch_monday_campaigns()
+    campaigns = await fetch_monday_campaigns()
     campaign_blocks = []
     
     for campaign in campaigns:
@@ -375,19 +366,19 @@ def create_monday_campaigns_view():
             "accessory": {
                 "type": "button",
                 "text": {"type": "plain_text", "text": "Open Board"},
-                "action_id": f"open_monday_board_{campaign['id']}",
+                "action_id": "open_monday_board",
                 "url": campaign["board_url"]
             }
         })
         
     return campaign_blocks
 
-def create_integrated_dashboard_modal():
+async def create_integrated_dashboard_modal():
     """Create an integrated dashboard showing both Monday.com campaigns and Google Calendar events."""
     try:
         # Get data from both systems
-        calendar_blocks = create_google_calendar_view()
-        campaign_blocks = create_monday_campaigns_view()
+        calendar_blocks = await create_google_calendar_view()
+        campaign_blocks = await create_monday_campaigns_view()
         
         blocks = [
             create_banner(),
@@ -419,7 +410,7 @@ def create_integrated_dashboard_modal():
             {"type": "divider"},
             {
                 "type": "section",
-                "text": {"type": "mrkdwn", "text": "*� Upcoming Events (Google Calendar)*"}
+                "text": {"type": "mrkdwn", "text": "*📅 Upcoming Events (Google Calendar)*"}
             },
             {"type": "divider"}
         ])
@@ -486,12 +477,12 @@ def create_integrated_dashboard_modal():
 
 # CACHING POLICY: Dashboard modals are NOT cached to ensure fresh data.
 # Always return a new modal instance to ensure real-time data consistency.
-def create_main_dashboard():
+async def create_main_dashboard():
     """Create the main dashboard modal with Monday.com and Google Calendar integration.
     Always returns a new modal object with fresh data. NOT cached for real-time updates."""
     try:
         # Return a fresh integrated dashboard modal every time
-        return create_integrated_dashboard_modal()
+        return await create_integrated_dashboard_modal()
     except Exception as e:
         logger.error(f"Error creating main dashboard: {e}")
         return create_error_modal("Dashboard Error", "Unable to load dashboard. Please try again.")
@@ -557,7 +548,7 @@ def create_monday_dashboard_modal():
                 "accessory": {
                     "type": "button",
                     "text": {"type": "plain_text", "text": "Open in Monday"},
-                    "action_id": f"open_monday_board",
+                    "action_id": "open_monday_board",
                     "url": campaign["board_url"]
                 }
             })
@@ -596,44 +587,11 @@ def create_monday_dashboard_modal():
         logger.error(f"Error creating Monday.com dashboard: {e}")
         return create_error_modal("Monday.com Error", "Unable to load Monday.com data.")
 
-def create_calendar_dashboard_modal():
+async def create_calendar_dashboard_modal():
     """Create Google Calendar-focused dashboard showing upcoming events."""
     try:
-        # This would fetch real data in production
-        events = [
-            {
-                "title": "Summer Launch Campaign Kickoff",
-                "date": "2025-07-25",
-                "time": "10:00 AM - 11:30 AM",
-                "location": "Conference Room A",
-                "attendees": ["kelly.redding@fetchrewards.com", "karen.lowry@fetchrewards.com"],
-                "type": "planning"
-            },
-            {
-                "title": "Q3 Marketing Review",
-                "date": "2025-07-26",
-                "time": "2:00 PM - 3:00 PM", 
-                "location": "Virtual Meeting",
-                "attendees": ["kate.jeffries@fetchrewards.com"],
-                "type": "review"
-            },
-            {
-                "title": "Community Meetup - Chicago",
-                "date": "2025-07-28",
-                "time": "All Day",
-                "location": "Chicago Convention Center",
-                "attendees": ["karen.lowry@fetchrewards.com", "kate.jeffries@fetchrewards.com"],
-                "type": "event"
-            },
-            {
-                "title": "Email Campaign Content Review",
-                "date": "2025-07-29",
-                "time": "9:00 AM - 10:00 AM",
-                "location": "Marketing Office",
-                "attendees": ["jheryl@fetchrewards.com", "kelly.redding@fetchrewards.com"],
-                "type": "content"
-            }
-        ]
+        # Use the unified calendar view
+        calendar_blocks = await create_google_calendar_view()
         
         blocks = [
             {
@@ -643,68 +601,37 @@ def create_calendar_dashboard_modal():
             {"type": "divider"}
         ]
         
-        # Group events by date
-        from datetime import datetime
-        today = datetime.now().date()
-        
-        for event in events:
-            event_date = datetime.strptime(event["date"], "%Y-%m-%d").date()
-            days_until = (event_date - today).days
-            
-            if days_until == 0:
-                date_indicator = "🔴 Today"
-            elif days_until == 1:
-                date_indicator = "🟡 Tomorrow"
-            elif days_until <= 3:
-                date_indicator = f"🟠 In {days_until} days"
-            else:
-                date_indicator = f"📅 {event['date']}"
-            
-            type_emoji = {
-                "planning": "📋",
-                "review": "👁️",
-                "event": "🎉",
-                "content": "✍️"
-            }.get(event["type"], "📅")
-            
-            attendee_count = len(event["attendees"])
-            
-            blocks.append({
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": f"*{event['title']}*\n{date_indicator} | {event['time']}\n📍 {event['location']} | 👥 {attendee_count} attendees\n{type_emoji} {event['type'].title()} Meeting"
-                },
-                "accessory": {
-                    "type": "button",
-                    "text": {"type": "plain_text", "text": "View Details"},
-                    "action_id": f"view_event_details"
-                }
-            })
-            blocks.append({"type": "divider"})
+        # Add calendar events
+        for i, block in enumerate(calendar_blocks):
+            blocks.append(block)
+            if i < len(calendar_blocks) - 1:
+                blocks.append({"type": "divider"})
         
         # Add calendar actions
-        blocks.append({
-            "type": "actions",
-            "elements": [
-                {
-                    "type": "button",
-                    "text": {"type": "plain_text", "text": "📅 Add Event"},
-                    "action_id": "create_calendar_event",
-                    "style": "primary"
-                },
-                {
-                    "type": "button",
-                    "text": {"type": "plain_text", "text": "🔄 Sync Calendar"},
-                    "action_id": "sync_calendar_data"
-                },
-                {
-                    "type": "button",
-                    "text": {"type": "plain_text", "text": "← Back to Dashboard"},
-                    "action_id": "back_to_main_dashboard"
-                }
-            ]
-        })
+        blocks.extend([
+            {"type": "divider"},
+            {
+                "type": "actions",
+                "elements": [
+                    {
+                        "type": "button",
+                        "text": {"type": "plain_text", "text": "📅 Add Event"},
+                        "action_id": "create_calendar_event",
+                        "style": "primary"
+                    },
+                    {
+                        "type": "button",
+                        "text": {"type": "plain_text", "text": "🔄 Sync Calendar"},
+                        "action_id": "sync_calendar_data"
+                    },
+                    {
+                        "type": "button",
+                        "text": {"type": "plain_text", "text": "← Back to Dashboard"},
+                        "action_id": "back_to_main_dashboard"
+                    }
+                ]
+            }
+        ])
         
         return {
             "type": "modal",
@@ -843,7 +770,7 @@ def create_content_modal():
     """Create content creation modal."""
     modal = {
         "type": "modal",
-        "callback_id": "create_content_modal",
+        "callback_id": "content_creation",
         "title": {"type": "plain_text", "text": "Content Creation"},
         "blocks": [
             {
@@ -880,43 +807,6 @@ def create_content_modal():
     }
     return modal
 
-def create_suggestions_results_modal(suggestions: list = None, suggestion_type: str = "campaign"):
-    """Create suggestions results modal with dropdown actions."""
-    if not suggestions:
-        suggestions = ["Email Campaign: Summer Sale", "Social Media: Product Launch", "Content Marketing: Blog Series"]
-    
-    suggestion_text = "\n".join([f"• {suggestion}" for suggestion in suggestions])
-    
-    modal = {
-        "type": "modal",
-        "callback_id": f"{suggestion_type}_suggestions_results",
-        "title": {"type": "plain_text", "text": f"{suggestion_type.title()} Suggestions"},
-        "blocks": [
-            {
-                "type": "section",
-                "text": {"type": "mrkdwn", "text": f"*AI-Generated {suggestion_type.title()} Suggestions*\n\n{suggestion_text}"}
-            },
-            {
-                "type": "actions",
-                "elements": [
-                    {
-                        "type": "static_select",
-                        "placeholder": {"type": "plain_text", "text": "Choose action..."},
-                        "action_id": "suggestion_action",
-                        "options": [
-                            {"text": {"type": "plain_text", "text": "Approve All"}, "value": "approve_all"},
-                            {"text": {"type": "plain_text", "text": "Select Individual"}, "value": "select_individual"},
-                            {"text": {"type": "plain_text", "text": "Generate New"}, "value": "generate_new"},
-                            {"text": {"type": "plain_text", "text": "Export to Monday.com"}, "value": "export_monday"}
-                        ]
-                    }
-                ]
-            }
-        ],
-        "submit": {"type": "plain_text", "text": "Execute"},
-        "close": {"type": "plain_text", "text": "← Back"}
-    }
-    return modal
 
 def create_slides_modal():
     """Create slides creation modal."""
@@ -1041,21 +931,21 @@ def register_core_modals(app):
     pass
 
 # Quick access functions for easy import
-def get_main_dashboard():
+async def get_main_dashboard():
     """Quick access to main dashboard modal."""
-    return create_main_dashboard()
+    return await create_main_dashboard()
 
 def get_monday_dashboard():
     """Quick access to Monday.com dashboard modal."""
     return create_monday_dashboard_modal()
 
-def get_calendar_dashboard():
+async def get_calendar_dashboard():
     """Quick access to calendar dashboard modal."""
-    return create_calendar_dashboard_modal()
+    return await create_calendar_dashboard_modal()
 
-def get_integrated_dashboard():
+async def get_integrated_dashboard():
     """Quick access to integrated dashboard modal."""
-    return create_integrated_dashboard_modal()
+    return await create_integrated_dashboard_modal()
 
 def create_content_generator_modal():
     """Create content generator modal with AI-generated suggestions."""
@@ -1069,7 +959,7 @@ def create_content_generator_modal():
     
     modal = {
         "type": "modal",
-        "callback_id": "content_generator_modal",
+        "callback_id": "content_gen",
         "title": {"type": "plain_text", "text": "AI Content Generator"},
         "blocks": [
             {
@@ -1232,7 +1122,6 @@ def create_audience_analysis_modal():
         "close": {"type": "plain_text", "text": "← Back"}
     }
 
-@lru_cache(maxsize=128)  # Limit cache size for memory efficiency
 def get_ai_tool_modal(action_id: str) -> Dict[str, Any]:
     """Retrieve AI tool modal with caching for static modals only.
     
@@ -1246,16 +1135,7 @@ def get_ai_tool_modal(action_id: str) -> Dict[str, Any]:
     elif action_id == "audience_analysis":
         return create_audience_analysis_modal()
     else:
-        return {
-            "type": "modal",
-            "title": {"type": "plain_text", "text": "Error"},
-            "blocks": [
-                {
-                    "type": "section",
-                    "text": {"type": "plain_text", "text": "Invalid selection."}
-                }
-            ]
-        }
+        return create_error_modal("Invalid Selection", "The requested AI tool is not available.")
 
 # Update the handle_ai_tool_selection function to use caching
 def handle_ai_tool_selection(action_id: str) -> Dict[str, Any]:
@@ -1276,43 +1156,60 @@ async def handle_dashboard_action(action_id: str):
     elif action_id == "open_monday_dashboard":
         return create_monday_dashboard_modal()
     elif action_id == "open_calendar_dashboard":
-        return create_calendar_dashboard_modal()
+        return await create_calendar_dashboard_modal()
     elif action_id == "back_to_main_dashboard":
-        return create_main_dashboard()
+        return await create_main_dashboard()
     elif action_id == "refresh_dashboard_data":
         # Refresh and return the integrated dashboard
-        return create_integrated_dashboard_modal()
+        return await create_integrated_dashboard_modal()
     elif action_id == "create_calendar_event":
         return create_event_modal()
     else:
-        return {
-            "type": "modal",
-            "title": {"type": "plain_text", "text": "Error"},
-            "blocks": [
-                {
-                    "type": "section",
-                    "text": {"type": "plain_text", "text": "Invalid selection."}
-                }
-            ]
-        }
+        return create_error_modal("Invalid Action", "The requested dashboard action is not available.")
 
 # Export key dashboard functions for easy access from other modules
 __all__ = [
+    # Core modal functions
     'create_main_dashboard',
     'create_monday_dashboard_modal', 
     'create_calendar_dashboard_modal',
     'create_integrated_dashboard_modal',
+    
+    # Quick access functions
     'get_main_dashboard',
     'get_monday_dashboard',
     'get_calendar_dashboard', 
     'get_integrated_dashboard',
+    
+    # Action handlers
     'handle_dashboard_action',
     'handle_monday_dashboard_actions',
     'handle_calendar_dashboard_actions',
+    
+    # View creators
     'create_google_calendar_view',
     'create_monday_campaigns_view',
+    
+    # Data fetchers
     'fetch_google_calendar_events',
-    'fetch_monday_campaigns'
+    'fetch_monday_campaigns',
+    
+    # Helper functions
+    'handle_modal_navigation',
+    'validate_form_data',
+    'create_error_modal',
+    
+    # Content and event modals
+    'create_content_modal',
+    'create_content_generator_modal',
+    'create_event_modal',
+    'create_event_details_modal',
+    'create_campaign_modal',
+    'create_ai_suggestions_modal',
+    
+    # AI tool functions
+    'get_ai_tool_modal',
+    'handle_ai_tool_selection'
 ]
 
 async def handle_monday_dashboard_actions(action_id: str, campaign_id: str = None):
@@ -1335,9 +1232,9 @@ async def handle_calendar_dashboard_actions(action_id: str, event_id: str = None
         return create_event_details_modal(event_id)
     elif action_id == "sync_calendar_data":
         # This would trigger a calendar sync
-        return create_calendar_dashboard_modal()
+        return await create_calendar_dashboard_modal()
     else:
-        return create_calendar_dashboard_modal()
+        return await create_calendar_dashboard_modal()
 
 def create_task_summary_modal():
     """Create task summary modal showing Monday.com task breakdown."""
@@ -1400,7 +1297,7 @@ def create_progress_report_modal():
         "close": {"type": "plain_text", "text": "Close"}
     }
 
-def create_event_details_modal(event_id: str = None):
+def create_event_details_modal():
     """Create event details modal for calendar events."""
     # Mock event details - would fetch real data based on event_id
     event = {

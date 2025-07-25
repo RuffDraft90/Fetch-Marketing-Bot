@@ -571,7 +571,7 @@ def create_monday_dashboard_modal():
                 {
                     "type": "button",
                     "text": {"type": "plain_text", "text": "← Back to Dashboard"},
-                    "action_id": "back_to_main_dashboard"
+                    "action_id": "back_to_campaign_hub"
                 }
             ]
         })
@@ -627,7 +627,7 @@ async def create_calendar_dashboard_modal():
                     {
                         "type": "button",
                         "text": {"type": "plain_text", "text": "← Back to Dashboard"},
-                        "action_id": "back_to_main_dashboard"
+                        "action_id": "back_to_campaign_hub"
                     }
                 ]
             }
@@ -661,7 +661,7 @@ def create_error_modal(title: str, message: str):
                     {
                         "type": "button",
                         "text": {"type": "plain_text", "text": "← Back"},
-                        "action_id": "back_to_main_dashboard"
+                        "action_id": "back_to_campaign_hub"
                     }
                 ]
             }
@@ -1158,7 +1158,9 @@ async def handle_dashboard_action(action_id: str):
     elif action_id == "open_calendar_dashboard":
         return await create_calendar_dashboard_modal()
     elif action_id == "back_to_main_dashboard":
-        return await create_main_dashboard()
+        # Redirect to campaign hub (Jheryl's homepage)
+        from handlers.core_slash_commands import create_campaign_hub_modal
+        return create_campaign_hub_modal()
     elif action_id == "refresh_dashboard_data":
         # Refresh and return the integrated dashboard
         return await create_integrated_dashboard_modal()
@@ -1255,8 +1257,8 @@ def create_task_summary_modal():
                 "elements": [
                     {
                         "type": "button",
-                        "text": {"type": "plain_text", "text": "← Back to Monday"},
-                        "action_id": "open_monday_dashboard"
+                        "text": {"type": "plain_text", "text": "← Back to Hub"},
+                        "action_id": "back_to_campaign_hub"
                     }
                 ]
             }
@@ -1288,8 +1290,8 @@ def create_progress_report_modal():
                     },
                     {
                         "type": "button",
-                        "text": {"type": "plain_text", "text": "← Back to Monday"},
-                        "action_id": "open_monday_dashboard"
+                        "text": {"type": "plain_text", "text": "← Back to Hub"},
+                        "action_id": "back_to_campaign_hub"
                     }
                 ]
             }
@@ -1357,8 +1359,8 @@ def create_event_details_modal():
                     },
                     {
                         "type": "button",
-                        "text": {"type": "plain_text", "text": "← Back to Calendar"},
-                        "action_id": "open_calendar_dashboard"
+                        "text": {"type": "plain_text", "text": "← Back to Hub"},
+                        "action_id": "back_to_campaign_hub"
                     }
                 ]
             }

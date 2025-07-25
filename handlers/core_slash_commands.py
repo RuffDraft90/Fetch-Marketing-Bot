@@ -50,7 +50,7 @@ def create_campaign_hub_modal():
         "type": "modal",
         "callback_id": "fetch_campaign_hub",
         "title": {"type": "plain_text", "text": "Fetch Campaign Hub"},
-        "close": {"type": "plain_text", "text": "← Back"},
+        "close": {"type": "plain_text", "text": "Close"},
         "blocks": [
             {
                 "type": "section",

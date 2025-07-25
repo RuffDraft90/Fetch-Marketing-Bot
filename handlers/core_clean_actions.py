@@ -1566,7 +1566,7 @@ def create_ai_suggestions_modal(suggestions: list):
                 {
                     "type": "button", 
                     "text": {"type": "plain_text", "text": "← Back"},
-                    "action_id": "back_to_smart_campaign"
+                    "action_id": "back_to_campaign_hub"
                 }
             ]
         }
